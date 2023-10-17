@@ -20,10 +20,30 @@
 #import "CDVInvokedUrlCommand.h"
 
 @implementation CDVInvokedUrlCommand
+
 @synthesize arguments = _arguments;
 @synthesize callbackId = _callbackId;
 @synthesize success = _success;
 @synthesize error = _error;
+
++ (CDVInvokedUrlCommand*)commandFromJson:(NSArray*)jsonEntry
+{
+    return [[CDVInvokedUrlCommand alloc] initFromJson:jsonEntry];
+}
+
+- (id)initFromJson:(NSArray*)jsonEntry
+{
+    id tmp = [jsonEntry objectAtIndex:0];
+    NSString* callbackId = tmp == [NSNull null] ? nil : tmp;
+    NSString* className = [jsonEntry objectAtIndex:1];
+    NSString* methodName = [jsonEntry objectAtIndex:2];
+    NSMutableArray* arguments = [jsonEntry objectAtIndex:3];
+
+    return [self initWithArguments:arguments
+                        callbackId:callbackId
+                         className:className
+                        methodName:methodName];
+}
 
 - (id)initWithArguments:(NSArray*)arguments success:(RCTResponseSenderBlock)successFunc error:(RCTResponseSenderBlock)errorFunc {
     self = [super init];
@@ -31,7 +51,7 @@
         _arguments = arguments;
         _success = successFunc;
         _error = errorFunc;
-        _callbackId = self;
+        //_callbackId = self;
     }
     return self;
 }
@@ -42,9 +62,51 @@
         _arguments = arguments;
         _success = command.success;
         _error = command.error;
-        _callbackId = self;
+        //_callbackId = self;
     }
     return self;
+}
+
+- (id)initWithArguments:(NSArray*)arguments
+             callbackId:(NSString*)callbackId
+              className:(NSString*)className
+             methodName:(NSString*)methodName
+{
+    self = [super init];
+    if (self != nil) {
+        _arguments = arguments;
+        _callbackId = callbackId;
+        _className = className;
+        _methodName = methodName;
+    }
+    [self massageArguments];
+    return self;
+}
+
+- (void)massageArguments
+{
+    NSMutableArray* newArgs = nil;
+
+    for (NSUInteger i = 0, count = [_arguments count]; i < count; ++i) {
+        id arg = [_arguments objectAtIndex:i];
+        if (![arg isKindOfClass:[NSDictionary class]]) {
+            continue;
+        }
+        NSDictionary* dict = arg;
+        NSString* type = [dict objectForKey:@"CDVType"];
+        if (!type || ![type isEqualToString:@"ArrayBuffer"]) {
+            continue;
+        }
+        NSString* data = [dict objectForKey:@"data"];
+        if (!data) {
+            continue;
+        }
+        if (newArgs == nil) {
+            newArgs = [NSMutableArray arrayWithArray:_arguments];
+            _arguments = newArgs;
+        }
+        [newArgs replaceObjectAtIndex:i withObject:[[NSData alloc] initWithBase64EncodedString:data options:0]];
+    }
 }
 
 - (id)argumentAtIndex:(NSUInteger)index

@@ -19,19 +19,36 @@
 
 #import <React/RCTBridgeModule.h>
 
+
+#define CDV_BRIDGE_NAME @"cordova"
+
+
 @interface CDVInvokedUrlCommand : NSObject {
-    id _callbackId;
+    NSString* _callbackId;
     NSArray* _arguments;
 }
 
 @property (nonatomic, strong) NSArray* arguments;
-@property (nonatomic, strong) id callbackId;
+@property (nonatomic, strong) NSString* callbackId;
+@property (nonatomic, readonly) NSString* className;
+@property (nonatomic, readonly) NSString* methodName;
+@property (nonatomic, strong) NSString* bridgeName;
+
 @property (nonatomic, strong) RCTResponseSenderBlock success;
 @property (nonatomic, strong) RCTResponseSenderBlock error;
 
 
 - (id)initWithArguments:(NSArray*)arguments success:(RCTResponseSenderBlock)successFunc error:(RCTResponseSenderBlock)errorFunc;
-- (id)initWithArguments: (NSArray*)arguments command:(CDVInvokedUrlCommand *)command;
+- (id)initWithArguments:(NSArray*)arguments command:(CDVInvokedUrlCommand *)command;
+
++ (CDVInvokedUrlCommand*)commandFromJson:(NSArray*)jsonEntry;
+
+- (id)initWithArguments:(NSArray*)arguments
+             callbackId:(NSString*)callbackId
+              className:(NSString*)className
+             methodName:(NSString*)methodName;
+
+- (id)initFromJson:(NSArray*)jsonEntry;
 
 // Returns the argument at the given index.
 // If index >= the number of arguments, returns nil.

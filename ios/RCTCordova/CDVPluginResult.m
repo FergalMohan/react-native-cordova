@@ -18,6 +18,7 @@
  */
 
 #import "CDVPluginResult.h"
+#import "CDVJSON_private.h"
 #import "NSData+Base64.h"
 
 @interface CDVPluginResult ()
@@ -151,6 +152,23 @@ id messageFromMultipart(NSArray* theMessages)
     NSDictionary* errDict = @{@"code" :[NSNumber numberWithInt:errorCode]};
 
     return [[self alloc] initWithStatus:statusOrdinal message:errDict];
+}
+
+- (void)setKeepCallbackAsBool:(BOOL)bKeepCallback
+{
+    [self setKeepCallback:[NSNumber numberWithBool:bKeepCallback]];
+}
+
+- (NSString*)argumentsAsJSON
+{
+    id arguments = (self.message == nil ? [NSNull null] : self.message);
+    NSArray* argumentsWrappedInArray = [NSArray arrayWithObject:arguments];
+
+    NSString* argumentsJSON = [argumentsWrappedInArray cdv_JSONString];
+
+    argumentsJSON = [argumentsJSON substringWithRange:NSMakeRange(1, [argumentsJSON length] - 2)];
+
+    return argumentsJSON;
 }
 
 @end

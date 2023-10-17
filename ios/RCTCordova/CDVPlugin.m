@@ -21,6 +21,12 @@
 #import <React/RCTLog.h>
 #import "CDVPlugin.h"
 
+
+NSString* const CDVPageDidLoadNotification = @"CDVPageDidLoadNotification";
+NSString* const CDVPluginHandleOpenURLNotification = @"CDVPluginHandleOpenURLNotification";
+NSString* const CDVPluginHandleOpenURLWithAppSourceAndAnnotationNotification = @"CDVPluginHandleOpenURLWithAppSourceAndAnnotationNotification";
+
+
 #define CDV_PLUGIN_IMPL \
 @synthesize commandDelegate = _commandDelegate; \
 \
@@ -31,22 +37,31 @@
 - (id)init { \
     self = [super init]; \
     if (self) { \
-        _commandDelegate = [[CDVCommandDelegateImpl alloc]init]; \
+        _commandDelegate = [[CDVCommandDelegateImpl alloc] init]; \
     } \
     return self; \
 } \
 \
 -(UIViewController*)viewController \
 { \
-    UIViewController *presentingViewController = [[[[UIApplication sharedApplication] delegate] window] rootViewController]; \
-    while(presentingViewController.presentedViewController != nil) { \
-        presentingViewController = presentingViewController.presentedViewController; \
-    } \
-    return presentingViewController; \
-}
+    NSLog(@"CDVPlugin get ViewController");  \
+    return _viewController; \
+} \
+- (void) pluginInitialize {}
 
 @implementation CDVPlugin
 CDV_PLUGIN_IMPL
+
+- (UIView*)webView
+{
+    UIView *aWebView = nil;
+  
+    if (self.viewController != nil){
+      if([self.viewController respondsToSelector:@selector(webView)])
+        aWebView = [self.viewController performSelector:@selector(webView)];
+    }
+    return aWebView;
+}
 @end
 
 @implementation CDVPluginEventEmitter

@@ -20,6 +20,10 @@
 #import "CDVCommandDelegateImpl.h"
 #import "CDVInvokedUrlCommand.h"
 
+extern NSString* const CDVPageDidLoadNotification;
+extern NSString* const CDVPluginHandleOpenURLNotification;
+extern NSString* const CDVPluginHandleOpenURLWithAppSourceAndAnnotationNotification;
+
 
 #define RCT_EXPORT_CORDOVA_METHOD(name) \
 RCT_EXPORT_METHOD(name:(NSArray *)args success:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error) { \
@@ -28,14 +32,17 @@ CDVInvokedUrlCommand *command = [[CDVInvokedUrlCommand alloc]initWithArguments:a
 }
 
 #define CDV_PLUGIN_DEFINE { \
-    CDVCommandDelegateImpl* _commandDelegate; \
+__weak CDVCommandDelegateImpl* _commandDelegate; \
 } \
-@property (nonatomic, readonly) CDVCommandDelegateImpl* commandDelegate; \
-@property (nonatomic, readonly, strong) UIViewController *viewController;
+@property (nonatomic, weak) CDVCommandDelegateImpl* commandDelegate; \
+@property (nonatomic, weak) UIViewController *viewController; \
+- (void) pluginInitialize;
 
 
 @interface CDVPlugin : NSObject <RCTBridgeModule>
 CDV_PLUGIN_DEFINE
+@property (nonatomic, readonly, weak) UIView* webView;
+
 @end
 
 @interface CDVPluginEventEmitter : NSObject <RCTBridgeModule>
