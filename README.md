@@ -1,5 +1,15 @@
-# React Native Cordova (remobile)
-A cordova plugin defines for react native on ios and android
+# React Native Plugin for Cordova (REMobile + Dual Bridge)
+Initiallly a RN plugin with defines/parameter handling for calling cordova plugin methods from a react native App on ios and android. Initially 10 files to allow native code in Cordova Plugins to be callable from the RN Bridge. 
+Used a couple of Macros:
+RCT_EXPORT_MODULE(pluginName)
+RCT_EXPORT_CORDOVA_METHOD(methodName)
+so that the plugin code would be accessible from React.
+Supplemented and fleshed out accordingly with a secondary JS<->Native Bridge so that the minimalist CDVPlugin would also be accessible via the original cordova.exec(pluginName, methodName, passHandler, failHandler) method.
+This involved taking the CDVCommandDelegateImpl from the existing Cordova App and adding it to REMobile codebase (along with some support files e.g. CDVCommandQueue and reinstated functionality of CDVInvokedUrlCommand from the slimmed down version).
+Additional functionality to allow config parsing, plugin management, logging and debug was reintroduced with most of the files lifted with minimal changes from the current Cordova iOS App.
+Changes were also required becase the UXP Server's HTML contents now need to be rendered in a React Native Web View, so all the functionality in the CDVWebViewEngine had to be migrated to BoiCustomWebView or CDVAwareViewController, which now manages the Cordova plugins. 
+In tandem with Cordova dependencies in MainViewController (subclassed from CDVViewController) and Cordova's AppDelegate were divided up appropriately between the new RCTAppDelgate subclass and CDVAwareViewController.
+The REMobile codebase file count increased to 37 from 10. 
 
 ## Installation
 ```sh
